@@ -41,9 +41,11 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
     }
   };
 
-  const handleSelect = (key, value) => {
-    setForm({ ...form, [key]: value });
-  };
+ const handleSelect = (key, value) => {
+  const updatedForm = { ...form, [key]: value };
+  console.log("Updated Form:", updatedForm);
+  setForm(updatedForm);
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -108,14 +110,19 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
           Deadline
         </label>
-        <Input
-          type="date"
-          name="deadline"
-          value={form.deadline}
-          onChange={handleChange}
-          required
-          className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-        />
+       <Input
+  type="date"
+  name="deadline"
+  value={
+    form.deadline
+      ? new Date(form.deadline).toISOString().split("T")[0]
+      : ""
+  }
+  onChange={handleChange}
+  required
+  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+/>
+
       </div>
 
       {/* Status */}
