@@ -40,7 +40,7 @@ const Profile = () => {
     try {
       const token = await getToken();
 
-      const res = await fetch("http://localhost:5000/applications", {
+      const res = await fetch("https://your-backend.onrender.com/applications", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

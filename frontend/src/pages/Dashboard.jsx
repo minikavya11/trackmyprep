@@ -69,7 +69,7 @@ const Dashboard = () => {
 
   const handleAdd = async (newApp) => {
     const token = await getToken();
-    const res = await fetch("http://localhost:5000/applications", {
+    const res = await fetch("https://your-backend.onrender.com/applications", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
