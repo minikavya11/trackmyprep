@@ -23,11 +23,15 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
     category: "Internship",
   });
 
-  useEffect(() => {
-    if (isEdit) {
-      setForm(initialData); // This will include _id from backend
-    }
-  }, [initialData]);
+ useEffect(() => {
+  if (isEdit && initialData) {
+    setForm((prevForm) => ({
+      ...prevForm,
+      ...initialData,
+      category: initialData.category || "Internship", // default fallback
+    }));
+  }
+}, [initialData, isEdit]);
 
   const handleChange = (e) => {
     if (e.target.name === "resume") {
