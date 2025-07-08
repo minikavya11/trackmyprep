@@ -23,45 +23,48 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
     category: "Internship",
   });
 
- useEffect(() => {
-  if (isEdit && initialData) {
-  setForm((prevForm) => ({
-    ...prevForm,
-    ...initialData,
-    category: initialData.category || "Internship",
-  }));
-}
-
-}, [initialData, isEdit]);
+  useEffect(() => {
+    if (isEdit && initialData) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        ...initialData,
+        category: initialData.category || "Internship",
+      }));
+    }
+  }, [initialData, isEdit]);
 
   const handleChange = (e) => {
-    if (e.target.name === "resume") {
-      const file = e.target.files[0];
+    const { name, value, files } = e.target;
+    if (name === "resume") {
+      const file = files[0];
       if (file) {
-        const resumeURL = URL.createObjectURL(file);
-        setForm({ ...form, resumeUrl: resumeURL });
+        setForm({ ...form, resumeUrl: file }); // store File directly
       }
     } else {
-      setForm({ ...form, [e.target.name]: e.target.value });
+      setForm({ ...form, [name]: value });
     }
   };
 
- const handleSelect = (key, value) => {
-  const updatedForm = { ...form, [key]: value };
-  console.log("Updated Form:", updatedForm);
-  setForm(updatedForm);
-};
+  const handleSelect = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const formData = new FormData();
+    Object.keys(form).forEach((key) => {
+      if (key !== "resumeUrl") formData.append(key, form[key]);
+    });
+
+    if (form.resumeUrl instanceof File) {
+      formData.append("resume", form.resumeUrl);
+    }
+
     if (isEdit) {
-      // Update application with _id intact
-      onUpdate(form);
+      onUpdate({ ...form, formData });
     } else {
-      // Add new application
-      onAdd(form);
-      // Reset form
+      onAdd(formData);
       setForm({
         company: "",
         role: "",
@@ -82,9 +85,7 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
     >
       {/* Company */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          Company
-        </label>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Company</label>
         <Input
           name="company"
           value={form.company}
@@ -97,9 +98,7 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
 
       {/* Role */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          Role
-        </label>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Role</label>
         <Input
           name="role"
           value={form.role}
@@ -112,33 +111,23 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
 
       {/* Deadline */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          Deadline
-        </label>
-       <Input
-  type="date"
-  name="deadline"
-  value={
-    form.deadline
-      ? new Date(form.deadline).toISOString().split("T")[0]
-      : ""
-  }
-  onChange={handleChange}
-  required
-  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
-/>
-
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Deadline</label>
+        <Input
+          type="date"
+          name="deadline"
+          value={
+            form.deadline ? new Date(form.deadline).toISOString().split("T")[0] : ""
+          }
+          onChange={handleChange}
+          required
+          className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+        />
       </div>
 
       {/* Status */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          Status
-        </label>
-        <Select
-          value={form.status}
-          onValueChange={(val) => handleSelect("status", val)}
-        >
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Status</label>
+        <Select value={form.status} onValueChange={(val) => handleSelect("status", val)}>
           <SelectTrigger className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600">
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
@@ -153,13 +142,8 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
 
       {/* Priority */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          Priority
-        </label>
-        <Select
-          value={form.priority}
-          onValueChange={(val) => handleSelect("priority", val)}
-        >
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Priority</label>
+        <Select value={form.priority} onValueChange={(val) => handleSelect("priority", val)}>
           <SelectTrigger className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600">
             <SelectValue placeholder="Select priority" />
           </SelectTrigger>
@@ -172,31 +156,24 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
       </div>
 
       {/* Category */}
-<div>
-  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-    Category
-  </label>
-  <Select
-    value={form.category}
-    onValueChange={(val) => handleSelect("category", val)}
-  >
-    <SelectTrigger className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600">
-      <SelectValue>{form.category || "Select category"}</SelectValue>
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="Internship">Internship</SelectItem>
-      <SelectItem value="Full-time">Full-time</SelectItem>
-      <SelectItem value="Remote">Remote</SelectItem>
-      <SelectItem value="Contract">Contract</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Category</label>
+        <Select value={form.category} onValueChange={(val) => handleSelect("category", val)}>
+          <SelectTrigger className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Internship">Internship</SelectItem>
+            <SelectItem value="Full-time">Full-time</SelectItem>
+            <SelectItem value="Remote">Remote</SelectItem>
+            <SelectItem value="Contract">Contract</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* Resume Upload */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          Resume (PDF)
-        </label>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Resume (PDF)</label>
         <Input
           type="file"
           name="resume"
@@ -204,13 +181,8 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
           onChange={handleChange}
           className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
         />
-        {form.resumeUrl && (
-          <a
-            href={form.resumeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-xs text-blue-600 dark:text-blue-400 mt-1 underline"
-          >
+        {typeof form.resumeUrl === "string" && form.resumeUrl && (
+          <a href={form.resumeUrl} target="_blank" className="text-sm text-blue-500 underline mt-1 block">
             View current resume
           </a>
         )}
@@ -218,9 +190,7 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
 
       {/* Note */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          Note
-        </label>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Note</label>
         <Input
           name="note"
           value={form.note}
@@ -230,11 +200,8 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
         />
       </div>
 
-      {/* Submit Button */}
-      <Button
-        type="submit"
-        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90 shadow-lg transition-all"
-      >
+      {/* Submit */}
+      <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         {isEdit ? "Update Application" : "Add Application"}
       </Button>
     </form>

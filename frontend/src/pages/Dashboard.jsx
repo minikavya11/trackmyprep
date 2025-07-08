@@ -7,7 +7,7 @@ import ApplicationCard from "../components/ApplicationCard";
 import useApplications from "../hooks/useApplication";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import logo from '../assets/intern.png';
+import logo from "../assets/intern.png";
 
 import {
   BarChart,
@@ -17,6 +17,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+
 import {
   Dialog,
   DialogTrigger,
@@ -48,7 +49,6 @@ const Dashboard = () => {
   const [editingApp, setEditingApp] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Search/Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
@@ -67,16 +67,16 @@ const Dashboard = () => {
     localStorage.setItem("theme", isDark ? "light" : "dark");
   };
 
-  const handleAdd = async (newApp) => {
+  const handleAdd = async (formData) => {
     const token = await getToken();
     const res = await fetch(`https://trackmyprep-backend.onrender.com/applications`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(newApp),
+      body: formData,
     });
+
     const savedApp = await res.json();
     setApplications((prev) => [savedApp, ...prev]);
   };
@@ -95,13 +95,20 @@ const Dashboard = () => {
 
   const handleUpdate = async (updatedApp) => {
     const token = await getToken();
+
+    let body = updatedApp.formData || JSON.stringify(updatedApp);
+    let headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    if (!(body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
+
     const res = await fetch(`https://trackmyprep-backend.onrender.com/applications/${updatedApp._id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(updatedApp),
+      headers,
+      body,
     });
 
     const updated = await res.json();
@@ -112,7 +119,6 @@ const Dashboard = () => {
     setEditingApp(null);
   };
 
-  // Filtering logic
   const filteredApps = applications.filter((app) => {
     return (
       app.company.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -137,16 +143,12 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-100 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-4 py-6 sm:px-6 lg:px-12">
       {/* Top Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
-       <div className="flex items-center gap-4 mb-6">
-  <img
-    src={logo}
-    alt="TrackMyPrep Logo"
-    className="w-14 h-14 rounded-full shadow-md"
-  />
-  <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-    Welcome to <span className="text-indigo-600 dark:text-indigo-400">TrackMyPrep</span> 👋
-  </h1>
-</div>
+        <div className="flex items-center gap-4 mb-6">
+          <img src={logo} alt="TrackMyPrep Logo" className="w-14 h-14 rounded-full shadow-md" />
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            Welcome to <span className="text-indigo-600 dark:text-indigo-400">TrackMyPrep</span> 👋
+          </h1>
+        </div>
 
         <div className="flex gap-3">
           <button
@@ -161,17 +163,13 @@ const Dashboard = () => {
             </button>
           </SignOutButton>
           <Link
-  to="/profile"
-  className="text-sm px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
->
-  🧑 View Profile
-</Link>
+            to="/profile"
+            className="text-sm px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
+          >
+            🧑 View Profile
+          </Link>
         </div>
       </div>
-
-     
-     
-
 
       {/* Weekly Chart */}
       <div className="bg-white dark:bg-gray-800 rounded p-4 mb-8">
@@ -185,7 +183,8 @@ const Dashboard = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-       {/* Search and Filters */}
+
+      {/* Search and Filters */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Input
           type="text"
