@@ -25,12 +25,13 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
 
  useEffect(() => {
   if (isEdit && initialData) {
-    setForm((prevForm) => ({
-      ...prevForm,
-      ...initialData,
-      category: initialData.category || "Internship", // default fallback
-    }));
-  }
+  setForm((prevForm) => ({
+    ...prevForm,
+    ...initialData,
+    category: initialData.category || "Internship",
+  }));
+}
+
 }, [initialData, isEdit]);
 
   const handleChange = (e) => {
@@ -171,25 +172,25 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
       </div>
 
       {/* Category */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-          Category
-        </label>
-        <Select
-          value={form.category}
-          onValueChange={(val) => handleSelect("category", val)}
-        >
-          <SelectTrigger className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600">
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Internship">Internship</SelectItem>
-            <SelectItem value="Full-time">Full-time</SelectItem>
-            <SelectItem value="Remote">Remote</SelectItem>
-            <SelectItem value="Contract">Contract</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+<div>
+  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
+    Category
+  </label>
+  <Select
+    value={form.category}
+    onValueChange={(val) => handleSelect("category", val)}
+  >
+    <SelectTrigger className="w-full dark:bg-gray-700 dark:text-white dark:border-gray-600">
+      <SelectValue>{form.category || "Select category"}</SelectValue>
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="Internship">Internship</SelectItem>
+      <SelectItem value="Full-time">Full-time</SelectItem>
+      <SelectItem value="Remote">Remote</SelectItem>
+      <SelectItem value="Contract">Contract</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
 
       {/* Resume Upload */}
       <div>
