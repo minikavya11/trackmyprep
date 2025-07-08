@@ -38,7 +38,7 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
     if (name === "resume") {
       const file = files[0];
       if (file) {
-        setForm({ ...form, resumeUrl: file }); // store File directly
+        setForm({ ...form, resumeUrl: file }); // Save the File object
       }
     } else {
       setForm({ ...form, [name]: value });
@@ -49,36 +49,38 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const formData = new FormData();
-  Object.keys(form).forEach((key) => {
-    if (key !== "resumeUrl") formData.append(key, form[key]);
-  });
+    const formData = new FormData();
 
-  if (form.resumeUrl instanceof File) {
-    formData.append("resume", form.resumeUrl); // append file
-  }
+    // Append all fields to FormData
+    for (const key in form) {
+      if (key === "resumeUrl" && form.resumeUrl instanceof File) {
+        formData.append("resume", form.resumeUrl);
+      } else {
+        formData.append(key, form[key]);
+      }
+    }
 
-  if (isEdit) {
-    onUpdate(formData); // ✅ send FormData directly
-  } else {
-    onAdd(formData); // ✅ send FormData directly
-    // Reset the form
-    setForm({
-      company: "",
-      role: "",
-      status: "Applied",
-      deadline: "",
-      priority: "Medium",
-      resumeUrl: "",
-      note: "",
-      category: "Internship",
-    });
-  }
-};
-
+    // Include _id for updates
+    if (isEdit && initialData._id) {
+      formData.append("_id", initialData._id);
+      onUpdate(formData);
+    } else {
+      onAdd(formData);
+      setForm({
+        company: "",
+        role: "",
+        status: "Applied",
+        deadline: "",
+        priority: "Medium",
+        resumeUrl: "",
+        note: "",
+        category: "Internship",
+      });
+    }
+  };
 
   return (
     <form
@@ -117,9 +119,7 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
         <Input
           type="date"
           name="deadline"
-          value={
-            form.deadline ? new Date(form.deadline).toISOString().split("T")[0] : ""
-          }
+          value={form.deadline ? new Date(form.deadline).toISOString().split("T")[0] : ""}
           onChange={handleChange}
           required
           className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
@@ -184,7 +184,7 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
           className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
         />
         {typeof form.resumeUrl === "string" && form.resumeUrl && (
-          <a href={form.resumeUrl} target="_blank" className="text-sm text-blue-500 underline mt-1 block">
+          <a href={form.resumeUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-500 underline mt-1 block">
             View current resume
           </a>
         )}

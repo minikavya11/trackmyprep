@@ -93,31 +93,26 @@ const Dashboard = () => {
     }
   };
 
-  const handleUpdate = async (updatedApp) => {
-    const token = await getToken();
+ const handleUpdate = async (formData) => {
+  const id = formData.get("_id");
+  const token = await getToken();
 
-    let body = updatedApp.formData || JSON.stringify(updatedApp);
-    let headers = {
+  const res = await fetch(`https://trackmyprep-backend.onrender.com/applications/${id}`, {
+    method: "PUT",
+    headers: {
       Authorization: `Bearer ${token}`,
-    };
+    },
+    body: formData,
+  });
 
-    if (!(body instanceof FormData)) {
-      headers["Content-Type"] = "application/json";
-    }
+  const updated = await res.json();
+  setApplications((prev) =>
+    prev.map((a) => (a._id === updated._id ? updated : a))
+  );
+  setIsDialogOpen(false);
+  setEditingApp(null);
+};
 
-    const res = await fetch(`https://trackmyprep-backend.onrender.com/applications/${updatedApp._id}`, {
-      method: "PUT",
-      headers,
-      body,
-    });
-
-    const updated = await res.json();
-    setApplications((prev) =>
-      prev.map((a) => (a._id === updated._id ? updated : a))
-    );
-    setIsDialogOpen(false);
-    setEditingApp(null);
-  };
 
   const filteredApps = applications.filter((app) => {
     return (
