@@ -9,7 +9,7 @@ export default function useApplications() {
     async function fetchApps() {
       try {
         const token = await getToken();
-        const res = await fetch('https://your-backend.onrender.com/applications', {
+        const res = await fetch('https://trackmyprep-backend.onrender.com/applications', {
           headers: { Authorization: `Bearer ${token}` },
         });
 

@@ -69,7 +69,7 @@ const Dashboard = () => {
 
   const handleAdd = async (newApp) => {
     const token = await getToken();
-    const res = await fetch("https://your-backend.onrender.com/applications", {
+    const res = await fetch(`https://trackmyprep-backend.onrender.com/applications`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -83,7 +83,7 @@ const Dashboard = () => {
 
   const handleDelete = async (id) => {
     const token = await getToken();
-    const res = await fetch(`http://localhost:5000/applications/${id}`, {
+    const res = await fetch(`https://trackmyprep-backend.onrender.com/applications/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -95,7 +95,7 @@ const Dashboard = () => {
 
   const handleUpdate = async (updatedApp) => {
     const token = await getToken();
-    const res = await fetch(`http://localhost:5000/applications/${updatedApp._id}`, {
+    const res = await fetch(`https://trackmyprep-backend.onrender.com/applications/${updatedApp._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
