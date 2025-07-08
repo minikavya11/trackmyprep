@@ -4,6 +4,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { ClerkExpressRequireAuth, clerkClient } from '@clerk/clerk-sdk-node';
 import applicationRoutes from './routes/applications.js';
+import path from "path";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,6 +18,8 @@ const corsOptions = {
   credentials: true,
 };
 
+// Static file serving
+app.use("/uploads", express.static("uploads")); // ✅ Serve uploaded resumes
 app.use(cors(corsOptions));
 app.use(express.json());
 

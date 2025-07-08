@@ -49,34 +49,36 @@ const ApplicationForm = ({ onAdd, onUpdate, initialData = null }) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const formData = new FormData();
-    Object.keys(form).forEach((key) => {
-      if (key !== "resumeUrl") formData.append(key, form[key]);
+  const formData = new FormData();
+  Object.keys(form).forEach((key) => {
+    if (key !== "resumeUrl") formData.append(key, form[key]);
+  });
+
+  if (form.resumeUrl instanceof File) {
+    formData.append("resume", form.resumeUrl); // append file
+  }
+
+  if (isEdit) {
+    onUpdate(formData); // ✅ send FormData directly
+  } else {
+    onAdd(formData); // ✅ send FormData directly
+    // Reset the form
+    setForm({
+      company: "",
+      role: "",
+      status: "Applied",
+      deadline: "",
+      priority: "Medium",
+      resumeUrl: "",
+      note: "",
+      category: "Internship",
     });
+  }
+};
 
-    if (form.resumeUrl instanceof File) {
-      formData.append("resume", form.resumeUrl);
-    }
-
-    if (isEdit) {
-      onUpdate({ ...form, formData });
-    } else {
-      onAdd(formData);
-      setForm({
-        company: "",
-        role: "",
-        status: "Applied",
-        deadline: "",
-        priority: "Medium",
-        resumeUrl: "",
-        note: "",
-        category: "Internship",
-      });
-    }
-  };
 
   return (
     <form
