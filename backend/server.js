@@ -8,19 +8,28 @@ import applicationRoutes from './routes/applications.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// ✅ Fix CORS for deployed frontend
+const allowedOrigins = ['https://trackmyprep.onrender.com'];
+
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Connect to MongoDB
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Application routes
+// Routes
 app.use("/applications", applicationRoutes);
 
-// Optional: Clerk user profile route
+// Clerk profile route
 app.get('/profile', ClerkExpressRequireAuth(), async (req, res) => {
   const userId = req.auth.userId;
   try {
@@ -30,7 +39,7 @@ app.get('/profile', ClerkExpressRequireAuth(), async (req, res) => {
       email: user.emailAddresses[0].emailAddress,
       firstName: user.firstName,
       lastName: user.lastName,
-    })
+    });
   } catch {
     res.status(500).json({ message: 'Failed to fetch user data' });
   }
